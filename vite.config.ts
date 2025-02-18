@@ -1,9 +1,16 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
 
+// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  resolve: {
-    dedupe: ['react', 'react-dom'],
+  server: {
+    proxy: {
+      '/api': { // Or whatever path you want to use as a proxy
+        target: 'https://api.replicate.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''), // Remove the /api prefix
+      },
+    },
   },
-});
+})

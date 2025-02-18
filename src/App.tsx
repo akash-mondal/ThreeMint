@@ -1,3 +1,4 @@
+// src/App.js
 import React, { useCallback, useState, useEffect, useRef } from "react";
 import type { Engine } from "tsparticles-engine";
 import Particles from "react-tsparticles";
@@ -6,25 +7,28 @@ import { Cuboid as Cube3d } from 'lucide-react';
 import Login from './components/Login';
 import Footer from './components/Footer';
 import { Header } from './components/Header';
+import { AboutSection, TechSection } from './components/Sections'; // Import sections
+import { PricingSection } from './components/PricingSection';
+
 
 function App() {
   const [showLogin, setShowLogin] = useState(false);
   const [currentPage, setCurrentPage] = useState('Home');
 
-  const homeRef = useRef<HTMLElement>(null);
-  const aboutRef = useRef<HTMLElement>(null);
-  const techRef = useRef<HTMLElement>(null);
-  const pricingRef = useRef<HTMLElement>(null);
-  const footerRef = useRef<HTMLElement>(null); // Changed from contactRef
+  const homeRef = useRef(null);
+  const aboutRef = useRef(null);
+  const techRef = useRef(null);
+  const pricingRef = useRef(null);
+  const footerRef = useRef(null);
 
-  const particlesInit = useCallback(async (engine: Engine) => {
+  const particlesInit = useCallback(async (engine) => {
     await loadSlim(engine);
   }, []);
 
   useEffect(() => {
     const options = {
       root: null,
-      rootMargin: '-50% 0px', // This will trigger when section is in middle of viewport
+      rootMargin: '-50% 0px',
       threshold: 0
     };
 
@@ -39,7 +43,6 @@ function App() {
       });
     }, options);
 
-    // Observe all sections
     const sections = document.querySelectorAll('[data-section-id]');
     sections.forEach(section => observer.observe(section));
 
@@ -133,7 +136,7 @@ function App() {
             }}
           />
 
-          <Header currentPage={currentPage} footerRef={footerRef} /> {/* Pass footerRef to Header */}
+          <Header currentPage={currentPage} footerRef={footerRef} />
 
           <div className="pt-16">
             <section ref={homeRef} data-section-id="Home" className="min-h-screen relative flex items-center justify-center text-white">
@@ -143,7 +146,7 @@ function App() {
                 </div>
                 <h1 className="text-6xl font-bold mb-4">3Mint</h1>
                 <p className="text-xl mb-8">Create and mint stunning 3D NFTs using just words</p>
-                <button 
+                <button
                   onClick={() => setShowLogin(true)}
                   className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-full transition duration-300 transform hover:scale-105"
                 >
@@ -152,16 +155,16 @@ function App() {
               </div>
             </section>
 
-            <section ref={aboutRef} data-section-id="About" className="min-h-screen bg-gray-900 relative">
-              {/* About section content */}
+            <section ref={aboutRef} data-section-id="About" className="min-h-screen relative">
+              <AboutSection />
             </section>
 
-            <section ref={techRef} data-section-id="Tech" className="min-h-screen bg-black relative">
-              {/* Tech section content */}
+            <section ref={techRef} data-section-id="Tech" className="min-h-screen relative">
+              <TechSection />
             </section>
 
-            <section ref={pricingRef} data-section-id="Pricing" className="min-h-screen bg-gray-900 relative">
-              {/* Pricing section content */}
+            <section ref={pricingRef} data-section-id="Pricing" className="min-h-screen relative">
+              <PricingSection />
             </section>
 
             <Footer ref={footerRef} />

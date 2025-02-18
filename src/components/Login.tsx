@@ -1,49 +1,125 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Github, Twitter, X, Disc as Discord, User } from 'lucide-react';
-import { motion } from 'framer-motion';
-
-interface LoginProps {
-  onClose: () => void;
-}
+import { motion, AnimatePresence } from 'framer-motion';
+import Alert from './Alert';
+import GuestDashboard from './GuestDashboard';
 
 const Login: React.FC<LoginProps> = ({ onClose }) => {
-  const handleLogin = (provider: string) => {
-    if (provider === 'guest') {
-      // Handle guest login
-      console.log('Guest login');
-    } else {
-      // Show dummy message for other providers
-      console.log(`${provider} login - Coming soon`);
-    }
-  };
+  const [showAlert, setShowAlert] = useState(true);
+  const [isGuestMode, setIsGuestMode] = useState(false);
+  const shapesContainerRef = useRef<HTMLDivElement>(null);
+  const gradientRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (gradientRef.current) {
+        const rect = gradientRef.current.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        gradientRef.current.style.setProperty('--mouse-x', `${x}px`);
+        gradientRef.current.style.setProperty('--mouse-y', `${y}px`);
+      }
+      
+      if (shapesContainerRef.current) {
+        const rect = shapesContainerRef.current.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        const rotateX = (e.clientY - centerY) / 20;
+        const rotateY = (e.clientX - centerX) / 20;
+        
+        // Update all shapes
+        const shapes = shapesContainerRef.current.getElementsByClassName('shape');
+        Array.from(shapes).forEach((shape) => {
+          shape.style.setProperty('--rotate-x', `${rotateX}deg`);
+          shape.style.setProperty('--rotate-y', `${rotateY}deg`);
+        });
+      }
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
+  if (isGuestMode) {
+    return <GuestDashboard />;
+  }
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50">
-      {/* Left side - Animated gradient background */}
+      {/* Left side - Animated shapes */}
       <motion.div 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="absolute inset-0 w-1/2 bg-black flex items-center justify-center"
+        className="absolute inset-0 w-1/2 bg-black flex items-center justify-center overflow-hidden"
       >
-        {/* Rotating Cube */}
-        <div className="cube">
-          <div className="cube-face front"></div>
-          <div className="cube-face back"></div>
-          <div className="cube-face right"></div>
-          <div className="cube-face left"></div>
-          <div className="cube-face top"></div>
-          <div className="cube-face bottom"></div>
+        <div ref={shapesContainerRef} className="shapes-container">
+          {/* Main center cube */}
+          <div className="shape cube-container absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+            <div className="cube">
+              <div className="cube-face front"></div>
+              <div className="cube-face back"></div>
+              <div className="cube-face right"></div>
+              <div className="cube-face left"></div>
+              <div className="cube-face top"></div>
+              <div className="cube-face bottom"></div>
+            </div>
+          </div>
+
+          {/* Additional floating shapes */}
+          <div className="shape cube-container absolute left-1/4 top-1/4 scale-50">
+            <div className="cube">
+              <div className="cube-face front"></div>
+              <div className="cube-face back"></div>
+              <div className="cube-face right"></div>
+              <div className="cube-face left"></div>
+              <div className="cube-face top"></div>
+              <div className="cube-face bottom"></div>
+            </div>
+          </div>
+
+          <div className="shape cube-container absolute right-1/4 bottom-1/4 scale-75">
+            <div className="cube">
+              <div className="cube-face front"></div>
+              <div className="cube-face back"></div>
+              <div className="cube-face right"></div>
+              <div className="cube-face left"></div>
+              <div className="cube-face top"></div>
+              <div className="cube-face bottom"></div>
+            </div>
+          </div>
+
+          <div className="shape cube-container absolute left-1/3 bottom-1/3 scale-25">
+            <div className="cube">
+              <div className="cube-face front"></div>
+              <div className="cube-face back"></div>
+              <div className="cube-face right"></div>
+              <div className="cube-face left"></div>
+              <div className="cube-face top"></div>
+              <div className="cube-face bottom"></div>
+            </div>
+          </div>
+
+          <div className="shape cube-container absolute right-1/3 top-1/3 scale-35">
+            <div className="cube">
+              <div className="cube-face front"></div>
+              <div className="cube-face back"></div>
+              <div className="cube-face right"></div>
+              <div className="cube-face left"></div>
+              <div className="cube-face top"></div>
+              <div className="cube-face bottom"></div>
+            </div>
+          </div>
         </div>
       </motion.div>
       
-      {/* Right side - RGB animation */}
+      {/* Right side - Updated gradient animation */}
       <motion.div 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="absolute inset-0 left-1/2 overflow-hidden"
-      >
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 animate-gradient-x" />
-      </motion.div>
+        transition={{ duration: 1.5 }}
+        className="absolute inset-0 left-1/2 w-1/2 gradient-side"
+      />
 
       {/* Login box */}
       <motion.div 
@@ -91,8 +167,8 @@ const Login: React.FC<LoginProps> = ({ onClose }) => {
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            onClick={() => handleLogin('guest')}
-            className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors"
+            onClick={() => setIsGuestMode(true)}
+            className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
           >
             <User className="w-5 h-5" />
             <span>Continue as Guest</span>
@@ -110,6 +186,13 @@ const Login: React.FC<LoginProps> = ({ onClose }) => {
           </svg>
         </motion.button>
       </motion.div>
+
+      {/* Alert Component */}
+      <AnimatePresence>
+        {showAlert && (
+          <Alert onClose={() => setShowAlert(false)} />
+        )}
+      </AnimatePresence>
     </div>
   );
 };
