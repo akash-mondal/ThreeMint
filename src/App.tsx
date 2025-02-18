@@ -1,16 +1,51 @@
-import React from 'react';
-import { useCallback, useState } from "react";
+import React, { useCallback, useState, useEffect, useRef } from "react";
 import type { Engine } from "tsparticles-engine";
 import Particles from "react-tsparticles";
 import { loadSlim } from "tsparticles-slim";
-import { Cuboid as Cube3d, Github, Twitter, X } from 'lucide-react';
+import { Cuboid as Cube3d } from 'lucide-react';
 import Login from './components/Login';
+import Footer from './components/Footer';
+import { Header } from './components/Header';
 
 function App() {
   const [showLogin, setShowLogin] = useState(false);
-  
+  const [currentPage, setCurrentPage] = useState('Home');
+
+  const homeRef = useRef<HTMLElement>(null);
+  const aboutRef = useRef<HTMLElement>(null);
+  const techRef = useRef<HTMLElement>(null);
+  const pricingRef = useRef<HTMLElement>(null);
+  const footerRef = useRef<HTMLElement>(null); // Changed from contactRef
+
   const particlesInit = useCallback(async (engine: Engine) => {
     await loadSlim(engine);
+  }, []);
+
+  useEffect(() => {
+    const options = {
+      root: null,
+      rootMargin: '-50% 0px', // This will trigger when section is in middle of viewport
+      threshold: 0
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const sectionId = entry.target.getAttribute('data-section-id');
+          if (sectionId) {
+            setCurrentPage(sectionId);
+          }
+        }
+      });
+    }, options);
+
+    // Observe all sections
+    const sections = document.querySelectorAll('[data-section-id]');
+    sections.forEach(section => observer.observe(section));
+
+    return () => {
+      sections.forEach(section => observer.unobserve(section));
+    };
   }, []);
 
   return (
@@ -29,9 +64,43 @@ function App() {
                 },
               },
               fpsLimit: 120,
+              interactivity: {
+                events: {
+                  onHover: {
+                    enable: true,
+                    mode: "grab",
+                  },
+                  onClick: {
+                    enable: true,
+                    mode: "push"
+                  },
+                  resize: true,
+                },
+                modes: {
+                  grab: {
+                    distance: 140,
+                    links: {
+                      opacity: 1
+                    }
+                  },
+                  push: {
+                    quantity: 4
+                  }
+                },
+              },
               particles: {
                 color: {
                   value: "#ffffff",
+                },
+                links: {
+                  color: "#ffffff",
+                  distance: 150,
+                  enable: true,
+                  opacity: 0.2,
+                  width: 1,
+                },
+                collisions: {
+                  enable: true,
                 },
                 move: {
                   direction: "none",
@@ -39,7 +108,7 @@ function App() {
                   outModes: {
                     default: "bounce",
                   },
-                  random: true,
+                  random: false,
                   speed: 1,
                   straight: false,
                 },
@@ -60,83 +129,43 @@ function App() {
                   value: { min: 1, max: 3 },
                 },
               },
+              detectRetina: true,
             }}
           />
 
-          {/* Hero Section */}
-          <section className="min-h-screen relative flex items-center justify-center text-white">
-            <div className="container mx-auto px-6 text-center">
-              <div className="flex justify-center mb-8">
-                <Cube3d size={64} className="text-blue-500" />
+          <Header currentPage={currentPage} footerRef={footerRef} /> {/* Pass footerRef to Header */}
+
+          <div className="pt-16">
+            <section ref={homeRef} data-section-id="Home" className="min-h-screen relative flex items-center justify-center text-white">
+              <div className="container mx-auto px-6 text-center">
+                <div className="flex justify-center mb-8">
+                  <Cube3d size={64} className="text-blue-500" />
+                </div>
+                <h1 className="text-6xl font-bold mb-4">3Mint</h1>
+                <p className="text-xl mb-8">Create and mint stunning 3D NFTs using just words</p>
+                <button 
+                  onClick={() => setShowLogin(true)}
+                  className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-full transition duration-300 transform hover:scale-105"
+                >
+                  Get Started
+                </button>
               </div>
-              <h1 className="text-6xl font-bold mb-4">3Mint</h1>
-              <p className="text-xl mb-8">Create and mint stunning 3D NFTs using just words</p>
-              <button 
-                onClick={() => setShowLogin(true)}
-                className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-full transition duration-300 transform hover:scale-105"
-              >
-                Get Started
-              </button>
-            </div>
-          </section>
+            </section>
 
-          {/* Placeholder sections for future content */}
-          <section className="min-h-screen bg-gray-900 relative">
-            {/* Section 2 content will go here */}
-          </section>
+            <section ref={aboutRef} data-section-id="About" className="min-h-screen bg-gray-900 relative">
+              {/* About section content */}
+            </section>
 
-          <section className="min-h-screen bg-black relative">
-            {/* Section 3 content will go here */}
-          </section>
+            <section ref={techRef} data-section-id="Tech" className="min-h-screen bg-black relative">
+              {/* Tech section content */}
+            </section>
 
-          <section className="min-h-screen bg-gray-900 relative">
-            {/* Section 4 content will go here */}
-          </section>
+            <section ref={pricingRef} data-section-id="Pricing" className="min-h-screen bg-gray-900 relative">
+              {/* Pricing section content */}
+            </section>
 
-          {/* Footer */}
-          <footer className="bg-black text-white py-12">
-            <div className="container mx-auto px-6">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-                <div>
-                  <div className="flex items-center mb-4">
-                    <Cube3d size={32} className="text-blue-500 mr-2" />
-                    <span className="text-xl font-bold">3Mint</span>
-                  </div>
-                  <p className="text-gray-400">Create, mint, and trade unique 3D NFTs using AI technology.</p>
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold mb-4">Resources</h3>
-                  <ul className="space-y-2">
-                    <li><a href="#" className="text-gray-400 hover:text-blue-500">Documentation</a></li>
-                    <li><a href="#" className="text-gray-400 hover:text-blue-500">Tutorials</a></li>
-                    <li><a href="#" className="text-gray-400 hover:text-blue-500">Blog</a></li>
-                  </ul>
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold mb-4">Company</h3>
-                  <ul className="space-y-2">
-                    <li><a href="#" className="text-gray-400 hover:text-blue-500">About</a></li>
-                    <li><a href="#" className="text-gray-400 hover:text-blue-500">Careers</a></li>
-                    <li><a href="#" className="text-gray-400 hover:text-blue-500">Contact</a></li>
-                  </ul>
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold mb-4">Connect</h3>
-                  <div className="flex space-x-4">
-                    <a href="#" className="text-gray-400 hover:text-blue-500">
-                      <Twitter size={24} />
-                    </a>
-                    <a href="#" className="text-gray-400 hover:text-blue-500">
-                      <Github size={24} />
-                    </a>
-                  </div>
-                </div>
-              </div>
-              <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-                <p>&copy; 2024 3Mint. All rights reserved.</p>
-              </div>
-            </div>
-          </footer>
+            <Footer ref={footerRef} />
+          </div>
         </>
       )}
     </div>
